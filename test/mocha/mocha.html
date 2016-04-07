@@ -1,0 +1,32 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet" href="mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  <script src="mocha.js"></script>
+  
+  <script>mocha.setup('bdd')</script>
+  <script>mocha.setup({globals: ['game', 'pos']});</script>
+
+  <script type="text/javascript" src="../lib/jquery-1.7.1.js"></script>
+  <script type="text/javascript" src="../lib/perlin.js"></script>
+  <script type="text/javascript" src="../lib/sugar-1.2.4.development.js"></script>
+  <script type="text/javascript" src="../conf/config.js"></script>
+  <script type="text/javascript" src="../conf/conf-fixtures.js"></script>
+  <script type="text/javascript" src="../conf/conf-events.js"></script>
+  <script type="text/javascript" src="../conf/conf-actions.js"></script>
+  <script type="text/javascript" src="../conf/conf-specialists.js"></script>
+  <script type="text/javascript" src="../conf/conf-items.js"></script>
+  <script type="text/javascript" src="../conf/conf-arena.js"></script>
+  <script type="text/javascript" src="../conf/conf-sets.js"></script>
+  <script type="text/javascript" src="../js/ti-game.js"></script>
+
+  <script src="test.core.js"></script>  
+  <script>
+    mocha.run();
+  </script>
+</body>
+</html>

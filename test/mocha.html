@@ -1,0 +1,28 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Unit Tests Curious Stories</title>
+  <link rel="stylesheet" href="mocha/mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+  
+  <script type="text/javascript" src="mocha/chai.js"></script>
+  <script type="text/javascript" src="mocha/mocha.js"></script>
+  
+  <script>
+  chai.should()
+  mocha.setup('bdd')
+  // mocha.setup({globals: ['game']})
+  </script>
+
+  <script type="text/javascript" src="../app/lib/jquery-1.7.1.js"></script>
+  <script type="text/javascript" src="../app/lib/sugar-1.4.1.dev.js"></script>
+  <script type="text/javascript" src="../app/js/core.js"></script>
+  <script type="text/javascript" src="js/test-core.js"></script>  
+    
+  <script>
+    mocha.run();
+  </script>
+</body>
+</html>
