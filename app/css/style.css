@@ -2,8 +2,23 @@
 body {
   background-color: black;
   color: white;
-  text-align: center;
+  /*text-align: center;*/
   font-family: Serif;
+
+  margin: 0; 
+  height: 100%; 
+  position: relative; 
+  /*overflow: hidden*/
+}
+
+html { height: 100%; }
+
+#firepad-container {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 #content {
@@ -57,4 +72,29 @@ body {
 @-o-keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+#nav {
+  position: static;
+  top: 0;
+  height: 32px;
+  background-color: black;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 0 20px;
+  border-bottom: 2px solid gray;
+}
+
+#nav h1 {
+  font-family: 'Permanent Marker', cursive;
+  color: white;
+  display: inline;
+  margin-right: 50px;
+}
+
+#nav a {
+  font-size: 2.0em;
+  color: white;
+  text-decoration: none;
+  margin-left: 10px;
 }

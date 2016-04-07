@@ -1,7 +1,9 @@
 class Proto
   @getEvent = (id) ->
     return id if Object.isObject(id)
-    config.events.find((e) -> e.id is id)
+    evt = config.events.find((e) -> e.id is id)
+    Core.assert(evt?, "Event with ID #{id} not found")
+    evt
 
 class TextHelper
   @replaceName = (text, names=[]) ->
@@ -17,16 +19,34 @@ class TextHelper
       if i<names.length-2
         nameTxt += ', '
 
-    text.replace('$name',  -> nameTxt)
+    text = text.replace('$name', nameTxt)
+
+    if names.length > 1
+      text = text.replace('$is',  "are")
+      text = text.replace('$i',  "we")
+      text = text.replace('$I',  "We")
+    else
+      text = text.replace('$is', "is")
+      text = text.replace('$i',  "I")
+      text = text.replace('$I',  "I")
+
+    text
 
   @parse = (txt, gender='male') ->
     if gender is 'female'
-      txt = txt.replace(/\b(He)\b/g,  "She")
-      txt = txt.replace(/\b(His)\b/g, "Her")
-      txt = txt.replace(/\b(Him)\b/g, "Her")
-      txt = txt.replace(/\b(he)\b/g,  "she")
-      txt = txt.replace(/\b(his)\b/g, "her")
-      txt = txt.replace(/\b(him)\b/g, "her")
+      txt = txt.replace('$He',  "She")
+      txt = txt.replace('$His', "Her")
+      txt = txt.replace('$Him', "Her")
+      txt = txt.replace('$he',  "she")
+      txt = txt.replace('$his', "her")
+      txt = txt.replace('$him', "her")
+    else
+      txt = txt.replace('$He',  "He")
+      txt = txt.replace('$His', "His")
+      txt = txt.replace('$Him', "Him")
+      txt = txt.replace('$he',  "he")
+      txt = txt.replace('$his', "his")
+      txt = txt.replace('$him', "him")
 
     matches = txt.match(/\[.*?\]/g)
     if matches?

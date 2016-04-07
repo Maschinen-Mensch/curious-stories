@@ -4,15 +4,24 @@ class Story
     @effs = new Effects(this)
 
     @setupExtensions()
-    @startGame()
+    # @startGame()
+
+    $('#content').hide()
 
   startGame: ->
-    $('#content').empty()
+    $('#firepad-container').hide()
+    $('#content').empty().show()
+
+    config.events = eval("[#{window.firepad.getText()}]")
 
     @partyFlags = {}
     @entities = []
 
     @showEvent('evt-start')
+
+  editGame: ->
+    $('#content').hide()    
+    $('#firepad-container').show()
 
   addEntity: ->
     newEntity = new Entity()
@@ -207,6 +216,9 @@ if window?
 
   window.startGame = ->
     window.story.startGame()
+
+  window.editGame = ->
+    window.story.editGame()
 
   window.onload = ->
     window.story = new Story
