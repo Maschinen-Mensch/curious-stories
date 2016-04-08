@@ -8,6 +8,7 @@
 
     <script type="text/javascript" src="lib/jquery-1.7.1.js"></script>
     <script type="text/javascript" src="lib/sugar-1.4.1.dev.js"></script>
+    <script type="text/javascript" src="lib/acorn.js"></script>
 
     <script type="text/javascript" src="conf/story.conf.js"></script>
 
@@ -18,23 +19,71 @@
     <script src="https://cdn.firebase.com/js/client/2.3.2/firebase.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/codemirror.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/mode/javascript/javascript.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.2.0/codemirror.css" />
+    <link rel="stylesheet" href="css/theme/monokai.css" />
+
+    <script type="text/javascript" src="mode/curiousscript/curiousscript.js"></script>
+
     <link rel="stylesheet" href="https://cdn.firebase.com/libs/firepad/1.3.0/firepad.css" />
     <script src="https://cdn.firebase.com/libs/firepad/1.3.0/firepad.min.js"></script>
 
     <link href='https://fonts.googleapis.com/css?family=Permanent+Marker' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
   </head>
   <body>
+    <div id="firepad-container"></div>
+    <div id="game"></div>
+
     <div id="nav">
-      <h1>Curious Stories</h1>
       <a href='' onclick="startGame(); return false;"><i class="fa fa-gamepad"></i></i></a>
       <a href='' onclick="editGame(); return false;"><i class="fa fa-pencil"></i></a>
     </div>
 
-    <div id="firepad-container"></div>
-    
-    <div id="content"></div>
+<div id="help">
+  <h1>Procedural Story Generation Engine</h1>
+
+  <h2>Syntax</h2>
+  <p>Each story consists of a list of events. The story always starts with the <em>first</em> event that is found in the document. An event might look like this..</p>
+
+<pre>
+{
+  id: 'start',
+  text: "I walked down the narrow dark floor.",
+  actions: [
+    'walkLeft', 
+    'walkRight'
+  ]
+},
+{
+  id: 'walkLeft',
+  actionText: "Walk left",
+  text: "I walked down the left path."
+},
+{
+  id: 'walkRight',
+  actionText: "Walk right",
+  text: "I walked down the right path and fell into a pit."
+}
+</pre>
+
+<h2>Events</h2>
+
+  <dl>
+    <dt>id</dt>
+    <dd>ID of the event, which allows to reference it from other events. In case you never want to reference it there is not ID required.</dd>
+
+    <dt>text</dt>
+    <dd>The text to be added by the event.</dd>
+
+    <dt>actionText</dt>
+    <dd>In case this event is used in a action list, this will be the text on the action button</dd>
+
+    <dt>actions</dt>
+    <dd>A list of event references.</dd>
+  </dl>
+</div>
 
     <script>
       function init() {
@@ -43,7 +92,13 @@
         // Create CodeMirror (with line numbers and the JavaScript mode).
         window.codeMirror = CodeMirror(document.getElementById('firepad-container'), {
           lineNumbers: true,
-          mode: 'javascript'
+          matchBrackets: true,
+          styleActiveLine: true,
+          mode: 'curiousscript',
+          theme: 'monokai',
+          lineWrapping: true
+          // tabSize: 2,
+
         });
 
         // Create Firepad.

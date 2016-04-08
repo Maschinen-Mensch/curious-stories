@@ -6,21 +6,29 @@ class Story
     @setupExtensions()
     # @startGame()
 
-    $('#content').hide()
+    $('#game').hide()
 
   startGame: ->
-    $('#firepad-container').hide()
-    $('#content').empty().show()
+    try
+      code = "[#{window.firepad.getText()}]"
+      acorn.parse(code)
+      config.events = eval(code)
+    catch e
+      alert(e.message)
+      return
 
-    config.events = eval("[#{window.firepad.getText()}]")
+    $('#firepad-container').hide()
+    $('#help').hide()
+    $('#game').empty().show()
 
     @partyFlags = {}
     @entities = []
 
-    @showEvent('evt-start')
+    @showEvent(config.events[0])
 
   editGame: ->
-    $('#content').hide()    
+    $('#game').hide()    
+    $('#help').show()    
     $('#firepad-container').show()
 
   addEntity: ->
@@ -40,7 +48,7 @@ class Story
     @doEvent(eventId)
 
     if @actions.length == 0 # game over
-      $('#content').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
+      $('#game').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
 
   doAction: (actionIdx) ->
     action = @actions[actionIdx]
@@ -114,13 +122,13 @@ class Story
     if txt?
       text = TextHelper.parse(txt)
       text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
-      $('#content').append("<p>#{text}</p>")
+      $('#game').append("<p>#{text}</p>")
 
   doEvent: (eventIn, entity) ->
     event = Proto.getEvent(eventIn)
     console.log("do event [#{event.id}]") if event.id?
 
-    $('#content .action').remove()
+    $('#game .action').remove()
 
     if not entity?
       @addText(event.text) # only if party effect
@@ -133,7 +141,7 @@ class Story
       action = Proto.getEvent(actionId)
 
       if @hasRequirements(action)
-        $('#content').append("
+        $('#game').append("
           <p class='action'>
             <a onClick=\"doAction('#{@actions.length}'); return false;\" href=''>
               #{action.actionText}
@@ -219,6 +227,9 @@ if window?
 
   window.editGame = ->
     window.story.editGame()
+
+  window.help = ->
+    window.story.showHelp()
 
   window.onload = ->
     window.story = new Story

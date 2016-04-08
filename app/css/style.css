@@ -11,24 +11,23 @@ body {
   /*overflow: hidden*/
 }
 
-html { height: 100%; }
-
-#firepad-container {
-  position: absolute;
-  top: 34px;
-  left: 0;
-  right: 0;
-  bottom: 0;
+html { 
+  height: 100%; 
 }
 
-#content {
+#firepad-container {
+  height: 100%;
+  margin-right: 440px;
+}
+
+#game {
   margin: 50px auto;
   text-align: left;
   width: 800px;
   padding: 50px;
 }
 
-#content p {
+#game p {
 	font-size: 1.1em;
   -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
      -moz-animation: fadein 2s; /* Firefox < 16 */
@@ -37,10 +36,10 @@ html { height: 100%; }
           animation: fadein 2s;
 }
 
-#content p.action {
+#game p.action {
 }
 
-#content a {
+#game a {
   text-decoration: none;
   color: teal;
 }
@@ -75,14 +74,13 @@ html { height: 100%; }
 }
 
 #nav {
-  position: static;
-  top: 0;
+  position: absolute;
+  top: 10px;
+  right: 426px;
   height: 32px;
-  background-color: black;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 0 20px;
-  border-bottom: 2px solid gray;
+  width: 100px;
+  font-size: 12px;
+  z-index: 100;
 }
 
 #nav h1 {
@@ -97,4 +95,49 @@ html { height: 100%; }
   color: white;
   text-decoration: none;
   margin-left: 10px;
+}
+
+#help {
+  overflow: scroll;
+  position: absolute;
+  width: 400px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  z-index: 10;
+  padding: 0 20px;
+  margin: 0;
+  font-family: verdana;
+  font-size: 0.8em;
+  color: #C3C3C3;
+  background-color: #333;
+}
+
+#help pre {
+  color: black;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  box-shadow: 0px 0px 6px 0px rgba(0,0,0,0.75);
+  border-radius: 2px;
+}
+
+#help h1 {
+  font-size: 1.3em;
+  margin-bottom: 40px;
+}
+
+#help h2 {
+  font-size: 1.0em;
+  color: #e6db74;
+}
+
+#help dl dt {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+a.powered-by-firepad {
+    display: none;
 }
