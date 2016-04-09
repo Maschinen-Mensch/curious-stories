@@ -10,9 +10,11 @@ class Story
 
   startGame: ->
     try
-      code = "[#{window.firepad.getText()}]"
-      acorn.parse(code)
-      config.events = eval(code)
+      # code = "[#{window.firepad.getText()}]"
+      # acorn.parse(code)
+      # config.events = eval(code)
+      code = window.firepad.getText().split('\n')
+      config.events = Parser.parse(code)
     catch e
       alert(e.message)
       return
