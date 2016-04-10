@@ -1,0 +1,162 @@
+start
+
+start
+  desc
+
+start
+  desc
+  ? act1
+  ? act2
+
+start
+  -> next1
+  - > next2
+
+start1
+  -> next1
+start2
+  -> next2
+
+start
+  ? act1
+  ? act2
+
+start
+  ? act
+    desc
+  ? act2
+    desc2
+
+start
+  ? act
+    desc
+    -> next
+
+start
+  - next1
+    ? act1
+    ? act2
+
+start
+  - next1
+    - next2
+      - next3
+
+start
+  ?> act1
+  ?> act2
+
+start
+start2
+  ? act1
+    -> next
+  ? act2
+
+start
+  ? act1
+    - next
+  ? act2
+
+start
+  ques
+  desc
+
+
+^^^^^^^^^^ UNIT TESTS ^^^^^^^^
+
+start
+  - addEntity: 3
+  ! mansion
+
+mansion
+  "Im standing in the living room."
+      @ "$name is looking a bit nervous."
+        count 1
+        reqSanity '..5'
+
+      @ "We should keep moving!"
+        count 1
+  
+  ?! basement
+  ?! attic
+
+basement 
+  "Investigate basement"
+  "You walk left and are struck by lightning."
+
+attic 
+  "Investigate attic"
+  "You walk right."
+  ! mansion-random
+
+mansion-random
+  ! mansion-castle 1
+  ! mansion-pit 1
+
+mansion-castle 
+  "We arrived at a giant castle."
+
+  ? Knock on door.
+    "You are attacked and killed."
+
+  ? Ignore castle and continue on path.
+    !mansion-random
+
+mansion-pit
+  "We arrived at a pit.",
+  
+  ? Jump over it.
+    "You fall into the pit and die."
+
+  ? Use rope.
+    "You use the rope to reach the other side.",
+    - reqPartyFlags: '+rope',
+    - setPartyFlags: '-rope',
+    ! mansion-random
+
+  ? Turn around.
+    ! mansion-random
+
+mansion-rope @mansion-random:10
+  "You find a rope.", 
+  reqPartyFlags: '-rope',
+  setPartyFlags: '+rope',
+  ! mansion-random
+
+
+__________ need to differentiate between inline and reference sub events
+
+
+start
+  You are on a path..
+  ? Go left
+    You walk left
+    - > main
+    
+  ? Go right
+    You walk right into your death. THE END
+    - > start
+  
+main
+  - > castle
+  - > pit
+  
+castle
+  You see a castle next to the path
+  ? Continue
+    - > main
+  
+  ? Go closer
+    The castle has no doors. You have to continue on your way
+    - > main
+  
+pit
+  A large pit stops your progress
+  ? Jump to the other side
+    - You make the jump and continue on the other side
+    - You dont make the jump. You die!
+      
+  ? Turn around
+    - > main
+  
+ 
