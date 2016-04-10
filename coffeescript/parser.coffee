@@ -16,6 +16,10 @@ class Parser
     state.events
 
   @parseLine = (line, state) ->
+    # remove comments
+    commentIdx = line.indexOf('//')
+    line = line[...commentIdx] if commentIdx > -1
+
     [spaces, line] = Parser.extract(line)
 
     return if line.length == 0

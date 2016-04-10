@@ -144,6 +144,21 @@ describe 'Parser', ->
     events[0].actions[0].should.be.eql('act1')
     events[0].actions[1].should.be.eql('act2')
 
+  it 'parseComment', ->
+    events = parse('//')
+    events.length.should.be.eql(0)
+
+  it 'parseComment2', ->
+    events = parse('start // comment')
+    events.length.should.be.eql(1)
+    events[0].id.should.be.eql('start')
+
+  it 'parseComment3', ->
+    events = parse('start\n  ? act // comment')
+    events.length.should.be.eql(1)
+    events[0].id.should.be.eql('start')
+    events[0].actions[0].actionText.should.be.eql('act')
+
   it 'extractLine', ->
     Parser.extract('a').should.be.eql([0, 'a'])
     Parser.extract('  a').should.be.eql([2, 'a'])
