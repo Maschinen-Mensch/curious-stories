@@ -126,7 +126,7 @@ class Story
     klass = if entity? then 'special' else ''
 
     if txt?
-      # text = TextHelper.parse(txt)
+      txt = TextHelper.parse(txt)
       # text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
       $('#gameText').append("<p class=#{klass}>#{txt}</p>")
 
