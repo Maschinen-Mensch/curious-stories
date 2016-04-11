@@ -51,7 +51,7 @@ class Story
     @doEvent(eventId)
 
     if @actions.length == 0 # game over
-      $('#game').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
+      $('#gameText').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
 
   doAction: (actionIdx) ->
     action = @actions[actionIdx]
@@ -65,7 +65,7 @@ class Story
         Core.assert(@reqs[key]?, "Unknown requirement #{key}")
 
         if not @reqs[key](val, entity)
-          console.warn("failed requirement #{key} for #{event.id}")
+          console.warn("failed requirement #{key} for event #{event.id ? 'inline'}")
           return false
 
     if not @doEntityEffects(event.entityEffects, true)
@@ -136,8 +136,8 @@ class Story
     if not entity?
       @addText(event.text) # only if party effect
 
-    if event.showImage?
-      $('#gameImage').css('background-image', "url(#{event.showImage}").fadeIn()
+    if event.image?
+      $('#gameImage').css('background-image', "url(#{event.image}").fadeIn()
     else
       $('#gameImage').hide()
 

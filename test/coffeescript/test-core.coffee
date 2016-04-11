@@ -145,19 +145,34 @@ describe 'Parser', ->
     events[0].actions[1].should.be.eql('act2')
 
   it 'parseComment', ->
-    events = parse('//')
+    events = parse('#')
     events.length.should.be.eql(0)
 
   it 'parseComment2', ->
-    events = parse('start // comment')
+    events = parse('start # comment')
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
 
   it 'parseComment3', ->
-    events = parse('start\n  ? act // comment')
+    events = parse('start\n  ? act # comment')
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
     events[0].actions[0].actionText.should.be.eql('act')
+
+  it 'parseCommandImage', ->
+    events = parse('start\n  desc\n  :image http://cc.com/img.png')
+    events.length.should.be.eql(1)
+    events[0].id.should.be.eql('start')
+    events[0].text.should.be.eql('desc')
+    events[0].image.should.be.eql('http://cc.com/img.png')
+
+  it 'parseCommandPartyFlags', ->
+    events = parse('start\n  desc\n  :reqPartyFlags +rope\n  :setPartyFlags -rope')
+    events.length.should.be.eql(1)
+    events[0].id.should.be.eql('start')
+    events[0].text.should.be.eql('desc')
+    events[0].reqPartyFlags.should.be.eql('+rope')
+    events[0].setPartyFlags.should.be.eql('-rope')
 
   it 'extractLine', ->
     Parser.extract('a').should.be.eql([0, 'a'])

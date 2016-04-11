@@ -44,8 +44,8 @@ class Parser
       @parseRef(rest, spaces, 'actions', state)
 
     else if peek is ':'
-      if rest.startsWith('image')
-        state.stack.last().evt.showImage = rest[5..].trim()
+      args = rest.split(' ').map((arg) -> arg.trim())
+      state.stack.last().evt[args[0]] = args[1]
 
     else
       evt = state.stack.last().evt
