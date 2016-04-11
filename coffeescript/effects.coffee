@@ -12,9 +12,9 @@ class Effects
   setFlags: (flags, entity) ->
     Core.setFlags(flags, entity.flags)
 
-  addEntity: (count=1) ->
-    for i in [0...count]
-      @story.addEntity()
+  addEntity: (atts) ->
+    newEntity = @story.addEntity()
+    Object.merge(newEntity, Parser.parseSetAttr(atts))
 
   showImage: (img) ->
     $('#gameImage').css('background-image', "url(#{img}").fadeIn()

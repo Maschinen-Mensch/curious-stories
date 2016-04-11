@@ -3,9 +3,6 @@ class Story
     @reqs = new Requirements(this)
     @effs = new Effects(this)
 
-    @setupExtensions()
-    # @startGame()
-
     $('#game').hide()
 
   startGame: ->
@@ -36,11 +33,6 @@ class Story
 
   addEntity: ->
     newEntity = new Entity()
-    # Object.merge(newEntity, protoEntity)
-
-    protoEntity = config.entities.sample()
-    newEntity.name = TextHelper.parse(protoEntity.name)
-
     @entities.push(newEntity)
 
   showEvent: (eventId) ->
@@ -49,7 +41,17 @@ class Story
     $('#gameText p').addClass('old')
 
     @actions = []
-    @doEvent(eventId)
+
+    # resolve event id
+    @doEvent(Proto.getEvent(eventId))
+
+    for action, actionIdx in @actions
+      $('#gameText').append("
+        <p class='action'>
+          <a onClick=\"doAction('#{actionIdx}'); return false;\" href=''>
+            #{action.actionText}
+          </a>
+        </p>")
 
     if @actions.length == 0 # game over
       $('#gameText').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
@@ -58,15 +60,15 @@ class Story
     action = @actions[actionIdx]
     @showEvent(action)
 
-  hasRequirements: (eventIn, entity) ->
-    event = Proto.getEvent(eventIn)
+  hasRequirements: (event, entity) ->
+    Core.assert(Object.isObject(event))
 
-    for key, val of event
-      if key.startsWith('req')
-        Core.assert(@reqs[key]?, "Unknown requirement #{key}")
+    for cmd in event.commands
+      if cmd.op.startsWith('req')
+        Core.assert(@reqs[cmd.op]?, "Unknown requirement #{cmd.op}")
 
-        if not @reqs[key](val, entity)
-          console.warn("failed requirement #{key} for event #{event.id ? 'inline'}")
+        if not @reqs[cmd.op](cmd.arg, entity)
+          console.warn("failed requirement #{cmd.op} for event #{event.id ? 'inline'}")
           return false
 
     if not @doEntityEffects(event.effects, true)
@@ -77,8 +79,10 @@ class Story
   expandEvent: (def) ->
     if def.ref? # id/slot syntax
       Proto.getEvent(def.ref)
+
     else if Object.isObject(def) # inline syntax
       def
+
     else # short id syntax
       Proto.getEvent(def)
 
@@ -118,7 +122,7 @@ class Story
 
   doCommands: (entry) ->
     for cmd in entry.commands
-      @effs[cmd.cmd](cmd.arg) if @effs[cmd.cmd]?
+      @effs[cmd.op](cmd.arg) if @effs[cmd.op]?
         
     return
 
@@ -130,8 +134,8 @@ class Story
       # text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
       $('#gameText').append("<p class=#{klass}>#{txt}</p>")
 
-  doEvent: (eventIn, entity) ->
-    event = Proto.getEvent(eventIn)
+  doEvent: (event, entity) ->
+    Core.assert(Object.isObject(event))
     console.log("do event [#{event.id}]") if event.id?
 
     @addText(event.text, entity)
@@ -144,13 +148,6 @@ class Story
       action = Proto.getEvent(actionId)
 
       if @hasRequirements(action)
-        $('#gameText').append("
-          <p class='action'>
-            <a onClick=\"doAction('#{@actions.length}'); return false;\" href=''>
-              #{action.actionText}
-            </a>
-          </p>")
-
         @actions.push(action)
 
     # follow-up events
@@ -208,14 +205,6 @@ class Story
 
     true
 
-  setupExtensions: ->
-    for evt in config.events
-      if evt.extends?
-        [id, slots] = evt.extends.split(':')
-
-        parentEvt = Proto.getEvent(id)
-        parentEvt.events ?= []
-        parentEvt.events.push({ref:id, slots:parseInt(slots) ? 1})
  
 # ---------------------------------------------
 

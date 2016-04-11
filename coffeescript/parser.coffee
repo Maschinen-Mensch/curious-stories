@@ -15,8 +15,17 @@ class Parser
 
     state.events
 
-  # @parseSetAttr = (line) ->
-  #   for attr in line.split(' ')
+  @parseSetAttr = (line) ->
+    atts = {}
+    for attrSet in line.split(' ')
+      [attrName, attrVals] = attrSet.split('=')
+
+      if attrName[0] is '$'
+        attrName = attrName[1..]
+
+      atts[attrName] = attrVals.split('|').sample()
+
+    atts
 
   @parseLine = (line, state) ->
     # remove comments
@@ -48,15 +57,15 @@ class Parser
 
     else if peek is ':'
       args = rest.split(' ').map((arg) -> arg.trim())
-      state.stack.last().evt.commands.push(cmd:args[0], arg:args[1])
+      state.stack.last().evt.commands.push(op:args[0], arg:args[1])
 
     else if peek is '@'
       @parseRef(rest, spaces, 'effects', state)
 
     else
       evt = state.stack.last().evt
+      evt.actionText = evt.text unless evt.actionText?
       evt.text = line
-      evt.actionText = line unless evt.actionText?
 
     state.indent = spaces
 
@@ -73,7 +82,11 @@ class Parser
       state.stack.last().evt[collection].push(evt)
 
       state.stack.push(spaces:spaces, evt:evt)
-      evt.actionText = evt.text = line
+      
+      if collection is 'actions'
+        evt.actionText = line
+      else
+        evt.text = line
 
   @extract = (line) ->
     spaces = 0

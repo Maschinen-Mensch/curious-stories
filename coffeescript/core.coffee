@@ -1,7 +1,8 @@
 class Proto
   @getEvent = (id) ->
     return id if Object.isObject(id)
-    evt = config.events.find((e) -> e.id is id)
+    
+    evt = config.events.filter((e) -> e.id is id).sample()
     Core.assert(evt?, "Event with ID #{id} not found")
     evt
 

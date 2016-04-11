@@ -28,7 +28,10 @@ describe 'Parser', ->
 
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
-    events[0].events.should.be.eql(['next1', 'next2'])
+    events[0].events.length.should.be.eql(2)
+
+    events[0].events[0].ref.should.be.eql('next1')
+    events[0].events[1].ref.should.be.eql('next2')
 
   it 'parseEvents2', ->
     events = parse('start1\n  -> next1\n\nstart2\n  -> next2')
@@ -36,10 +39,17 @@ describe 'Parser', ->
     events.length.should.be.eql(2)
     events[0].id.should.be.eql('start1')
     events[0].events.length.should.be.eql(1)
-    events[0].events[0].should.be.eql('next1')
+    events[0].events[0].ref.should.be.eql('next1')
+
     events[1].id.should.be.eql('start2')
     events[1].events.length.should.be.eql(1)
-    events[1].events[0].should.be.eql('next2')
+    events[1].events[0].ref.should.be.eql('next2')
+
+  # it 'parseEvents3', ->
+  #   events = parse('start\n  -2> next1\n  -3 next2')
+  #   events.length.should.be.eql(1)
+  #   events[0].events[0].ref.should.be.eql('next1')
+
 
   it 'parseActions', ->
     lines = ['start', '  ? act1', '  ? act2']
@@ -93,7 +103,7 @@ describe 'Parser', ->
     events[0].actions[0].text.should.be.eql('desc')
 
     events[0].actions[0].events.length.should.be.eql(1)
-    events[0].actions[0].events[0].should.be.eql('next')
+    events[0].actions[0].events[0].ref.should.be.eql('next')
 
   it 'parseActionsDeep2', ->
     events = parse('start\n  - next1\n    -next2\n      -  next3')
@@ -126,7 +136,7 @@ describe 'Parser', ->
     events[1].actions[0].actionText.should.be.eql('act1')
     events[1].actions[1].actionText.should.be.eql('act2')
 
-    events[1].actions[0].events[0].should.be.eql('next')
+    events[1].actions[0].events[0].ref.should.be.eql('next')
 
   it 'parseActionsEventInline3', ->
     events = parse('start\n  ? act1\n    - next\n  ? act2')
@@ -141,8 +151,8 @@ describe 'Parser', ->
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
     events[0].actions.length.should.be.eql(2)
-    events[0].actions[0].should.be.eql('act1')
-    events[0].actions[1].should.be.eql('act2')
+    events[0].actions[0].ref.should.be.eql('act1')
+    events[0].actions[1].ref.should.be.eql('act2')
 
   it 'parseComment', ->
     events = parse('#')
@@ -160,19 +170,47 @@ describe 'Parser', ->
     events[0].actions[0].actionText.should.be.eql('act')
 
   it 'parseCommandImage', ->
-    events = parse('start\n  desc\n  :image http://cc.com/img.png')
+    events = parse('start\n  desc\n  : image http://cc.com/img.png')
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
     events[0].text.should.be.eql('desc')
-    events[0].image.should.be.eql('http://cc.com/img.png')
+
+    events[0].commands.length.should.be.eql(1)
+    events[0].commands[0].op.should.be.eql('image')
+    events[0].commands[0].arg.should.be.eql('http://cc.com/img.png')
 
   it 'parseCommandPartyFlags', ->
-    events = parse('start\n  desc\n  :reqPartyFlags +rope\n  :setPartyFlags -rope')
+    events = parse('start\n  desc\n  :reqPartyFlags +rope\n  :reqPartyFlags -rope')
+
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
     events[0].text.should.be.eql('desc')
-    events[0].reqPartyFlags.should.be.eql('+rope')
-    events[0].setPartyFlags.should.be.eql('-rope')
+
+    events[0].commands.length.should.be.eql(2)
+    events[0].commands[0].op.should.be.eql('reqPartyFlags')
+    events[0].commands[1].op.should.be.eql('reqPartyFlags')
+
+  it 'parseEffects', ->
+    events = parse('start\n  @ hello')
+
+    events.length.should.be.eql(1)
+    events[0].id.should.be.eql('start')
+    events[0].effects.length.should.be.eql(1)
+    events[0].effects[0].text.should.be.eql('hello')
+
+  it 'parseSetAttr', ->
+    atts = Parser.parseSetAttr('$name=Bob')
+    atts.name.should.be.eql('Bob')
+
+    atts = Parser.parseSetAttr('name=Rob')
+    atts.name.should.be.eql('Rob')
+
+    atts = Parser.parseSetAttr('name=Hans|Hans')
+    atts.name.should.be.eql('Hans')
+
+    atts = Parser.parseSetAttr('name=Hans|Hans job=Coder')
+    atts.name.should.be.eql('Hans')
+    atts.job.should.be.eql('Coder')
 
   it 'extractLine', ->
     Parser.extract('a').should.be.eql([0, 'a'])
