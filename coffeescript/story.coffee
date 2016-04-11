@@ -21,7 +21,8 @@ class Story
 
     $('#firepad-container').hide()
     $('#help').hide()
-    $('#game').empty().show()
+    $('#gameText').empty()
+    $('#game').show()
 
     @partyFlags = {}
     @entities = []
@@ -124,16 +125,21 @@ class Story
     if txt?
       text = TextHelper.parse(txt)
       text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
-      $('#game').append("<p>#{text}</p>")
+      $('#gameText').append("<p>#{text}</p>")
 
   doEvent: (eventIn, entity) ->
     event = Proto.getEvent(eventIn)
     console.log("do event [#{event.id}]") if event.id?
 
-    $('#game .action').remove()
+    $('#gameText .action').remove()
 
     if not entity?
       @addText(event.text) # only if party effect
+
+    if event.showImage?
+      $('#gameImage').css('background-image', "url(#{event.showImage}").fadeIn()
+    else
+      $('#gameImage').hide()
 
     @doEffects(event)
     @doEntityEffects(event.entityEffects)
@@ -143,7 +149,7 @@ class Story
       action = Proto.getEvent(actionId)
 
       if @hasRequirements(action)
-        $('#game').append("
+        $('#gameText').append("
           <p class='action'>
             <a onClick=\"doAction('#{@actions.length}'); return false;\" href=''>
               #{action.actionText}

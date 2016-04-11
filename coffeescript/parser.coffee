@@ -17,7 +17,7 @@ class Parser
 
   @parseLine = (line, state) ->
     # remove comments
-    commentIdx = line.indexOf('//')
+    commentIdx = line.indexOf('#')
     line = line[...commentIdx] if commentIdx > -1
 
     [spaces, line] = Parser.extract(line)
@@ -42,6 +42,10 @@ class Parser
 
     else if peek is '?'
       @parseRef(rest, spaces, 'actions', state)
+
+    else if peek is ':'
+      if rest.startsWith('image')
+        state.stack.last().evt.showImage = rest[5..].trim()
 
     else
       evt = state.stack.last().evt
