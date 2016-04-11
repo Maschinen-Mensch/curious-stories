@@ -3,7 +3,7 @@ class Parser
     @events = []
 
   @newEvent = ->
-    { events: [], actions: [], effects: [] }
+    { events: [], actions: [], effects: [], commands: [] }
 
   @parse = (lines) ->
     state = 
@@ -48,7 +48,7 @@ class Parser
 
     else if peek is ':'
       args = rest.split(' ').map((arg) -> arg.trim())
-      state.stack.last().evt[args[0]] = args[1]
+      state.stack.last().evt.commands.push(cmd:args[0], arg:args[1])
 
     else if peek is '@'
       @parseRef(rest, spaces, 'effects', state)

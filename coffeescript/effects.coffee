@@ -16,6 +16,9 @@ class Effects
     for i in [0...count]
       @story.addEntity()
 
+  showImage: (img) ->
+    $('#gameImage').css('background-image', "url(#{img}").fadeIn()
+
 class Requirements
   constructor: (story) ->
     @story = story

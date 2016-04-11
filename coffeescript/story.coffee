@@ -45,6 +45,7 @@ class Story
 
   showEvent: (eventId) ->
     $('#gameText .action').remove()
+    $('#gameImage').hide()
     $('#gameText p').addClass('old')
 
     @actions = []
@@ -115,9 +116,9 @@ class Story
 
     null
 
-  doEffects: (entry) ->
-    for key, val of entry
-      @effs[key](val) if @effs[key]?
+  doCommands: (entry) ->
+    for cmd in entry.commands
+      @effs[cmd.cmd](cmd.arg) if @effs[cmd.cmd]?
         
     return
 
@@ -135,12 +136,7 @@ class Story
 
     @addText(event.text, entity)
 
-    if event.image?
-      $('#gameImage').css('background-image', "url(#{event.image}").fadeIn()
-    else
-      $('#gameImage').hide()
-
-    @doEffects(event)
+    @doCommands(event)
     @doEntityEffects(event.effects)
 
     # actions
