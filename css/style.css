@@ -55,6 +55,7 @@ html {
 #gameImage {
   width: 360px;
   height: 240px;
+  background-size: cover;
 }
 
 @keyframes fadein {

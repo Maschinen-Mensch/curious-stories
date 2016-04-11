@@ -16,7 +16,7 @@ class Effects
     newEntity = @story.addEntity()
     Object.merge(newEntity, Parser.parseSetAttr(atts))
 
-  showImage: (img) ->
+  image: (img) ->
     $('#gameImage').css('background-image', "url(#{img}").fadeIn()
 
 class Requirements
