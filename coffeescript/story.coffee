@@ -47,6 +47,9 @@ class Story
     @entities.push(newEntity)
 
   showEvent: (eventId) ->
+    $('#gameText .action').remove()
+    $('#gameText p').addClass('old')
+
     @actions = []
     @doEvent(eventId)
 
@@ -130,8 +133,6 @@ class Story
   doEvent: (eventIn, entity) ->
     event = Proto.getEvent(eventIn)
     console.log("do event [#{event.id}]") if event.id?
-
-    $('#gameText .action').remove()
 
     if not entity?
       @addText(event.text) # only if party effect
