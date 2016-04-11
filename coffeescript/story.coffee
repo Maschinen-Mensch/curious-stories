@@ -41,9 +41,6 @@ class Story
     protoEntity = config.entities.sample()
     newEntity.name = TextHelper.parse(protoEntity.name)
 
-    for key, val of protoEntity when key[0] is '$'
-      newEntity.attributes[key[1..]] = Core.randRange(val) 
-
     @entities.push(newEntity)
 
   showEvent: (eventId) ->
@@ -71,7 +68,7 @@ class Story
           console.warn("failed requirement #{key} for event #{event.id ? 'inline'}")
           return false
 
-    if not @doEntityEffects(event.entityEffects, true)
+    if not @doEntityEffects(event.effects, true)
       return false
           
     true
@@ -124,18 +121,19 @@ class Story
         
     return
 
-  addText: (txt, entities=[]) ->
+  addText: (txt, entity) ->
+    klass = if entity? then 'special' else ''
+
     if txt?
-      text = TextHelper.parse(txt)
-      text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
-      $('#gameText').append("<p>#{text}</p>")
+      # text = TextHelper.parse(txt)
+      # text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
+      $('#gameText').append("<p class=#{klass}>#{txt}</p>")
 
   doEvent: (eventIn, entity) ->
     event = Proto.getEvent(eventIn)
     console.log("do event [#{event.id}]") if event.id?
 
-    if not entity?
-      @addText(event.text) # only if party effect
+    @addText(event.text, entity)
 
     if event.image?
       $('#gameImage').css('background-image', "url(#{event.image}").fadeIn()
@@ -143,7 +141,7 @@ class Story
       $('#gameImage').hide()
 
     @doEffects(event)
-    @doEntityEffects(event.entityEffects)
+    @doEntityEffects(event.effects)
 
     # actions
     for actionId in Core.arrify(event.actions)
@@ -203,8 +201,7 @@ class Story
       unless testOnly
         continue if evt.chance? and Math.random()>evt.chance
 
-        # add effect text for all entities at once
-        @addText(evt.text, entities)
+        # @addText(evt.text, entities)
         
         # do event individually for each captured person
         for ent in entities.randomize()

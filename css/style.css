@@ -36,6 +36,10 @@ html {
           animation: fadein 2s;
 }
 
+#gameText p.special {
+  color: orange;
+}
+
 #gameText p.old {
   color: #393939;
 }

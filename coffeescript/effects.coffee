@@ -9,10 +9,10 @@ class Effects
   setPartyFlags: (flags, entity) ->
     Core.setFlags(flags, @story.partyFlags)
 
-  setFlags: (flats, entity) ->
+  setFlags: (flags, entity) ->
     Core.setFlags(flags, entity.flags)
 
-  addEntity: (count) ->
+  addEntity: (count=1) ->
     for i in [0...count]
       @story.addEntity()
 

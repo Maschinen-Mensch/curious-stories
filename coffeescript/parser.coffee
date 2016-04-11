@@ -3,7 +3,7 @@ class Parser
     @events = []
 
   @newEvent = ->
-    { events: [], actions: [] }
+    { events: [], actions: [], effects: [] }
 
   @parse = (lines) ->
     state = 
@@ -14,6 +14,9 @@ class Parser
       @parseLine(line, state)
 
     state.events
+
+  # @parseSetAttr = (line) ->
+  #   for attr in line.split(' ')
 
   @parseLine = (line, state) ->
     # remove comments
@@ -47,6 +50,9 @@ class Parser
       args = rest.split(' ').map((arg) -> arg.trim())
       state.stack.last().evt[args[0]] = args[1]
 
+    else if peek is '@'
+      @parseRef(rest, spaces, 'effects', state)
+
     else
       evt = state.stack.last().evt
       evt.text = line
@@ -60,7 +66,7 @@ class Parser
 
     if line[0] is '>'
       evt = line[1..].trim()
-      state.stack.last().evt[collection].push(evt)
+      state.stack.last().evt[collection].push({ref:evt})
       
     else
       evt = Parser.newEvent()
