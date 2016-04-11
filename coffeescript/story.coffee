@@ -6,25 +6,22 @@ class Story
     $('#game').hide()
 
   startGame: ->
-    try
-      # code = "[#{window.firepad.getText()}]"
-      # acorn.parse(code)
-      # config.events = eval(code)
-      code = window.firepad.getText().split('\n')
-      config.events = Parser.parse(code)
-    catch e
-      alert(e.message)
-      return
+    @partyFlags = {}
+    @entities = []
 
     $('#firepad-container').hide()
     $('#help').hide()
     $('#gameText').empty()
     $('#game').show()
 
-    @partyFlags = {}
-    @entities = []
+    try
+      code = window.firepad.getText().split('\n')
+      config.events = Parser.parse(code)
+      @showEvent(config.events[0])
 
-    @showEvent(config.events[0])
+    catch e
+      alert(e.message)
+      return false
 
   editGame: ->
     $('#game').hide()    
@@ -34,6 +31,7 @@ class Story
   addEntity: ->
     newEntity = new Entity()
     @entities.push(newEntity)
+    newEntity
 
   showEvent: (eventId) ->
     $('#gameText .action').remove()
@@ -132,6 +130,10 @@ class Story
     if txt?
       txt = TextHelper.parse(txt)
       # text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
+
+      if entity?
+        txt = TextHelper.replaceAtts(txt, entity.attributes)
+
       $('#gameText').append("<p class=#{klass}>#{txt}</p>")
 
   doEvent: (event, entity) ->
@@ -161,7 +163,7 @@ class Story
     consumedEntities = []
 
     for eff in Core.arrify(effects)
-      optional = eff.optional ? false
+      optional = eff.optional ? true
       continue if optional and testOnly
 
       evt = @expandEvent(eff)
@@ -184,7 +186,8 @@ class Story
 
       else
         [minCount, maxCount] = Core.parseRange(count)
-        return false if entities.length < minCount
+        if entities.length < minCount
+          if optional then continue else return false
 
         entities = entities.sample(maxCount)
 

@@ -15,14 +15,11 @@ class Parser
 
     state.events
 
-  @parseSetAttr = (line) ->
+  @parseAtts = (line) ->
     atts = {}
     for attrSet in line.split(' ')
       [attrName, attrVals] = attrSet.split('=')
-
-      if attrName[0] is '$'
-        attrName = attrName[1..]
-
+      attrName = attrName[1..] if attrName[0] is '$'
       atts[attrName] = attrVals.split('|').sample()
 
     atts
@@ -55,12 +52,12 @@ class Parser
     else if peek is '?'
       @parseRef(rest, spaces, 'actions', state)
 
-    else if peek is ':'
-      args = rest.split(' ').map((arg) -> arg.trim())
-      state.stack.last().evt.commands.push(op:args[0], arg:args[1])
-
     else if peek is '@'
       @parseRef(rest, spaces, 'effects', state)
+
+    else if peek is ':'
+      args = rest.split(' ').map((arg) -> arg.trim())
+      state.stack.last().evt.commands.push(op:args[0], arg:args[1..].join(' '))
 
     else
       evt = state.stack.last().evt

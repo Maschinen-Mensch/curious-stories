@@ -198,17 +198,26 @@ describe 'Parser', ->
     events[0].effects.length.should.be.eql(1)
     events[0].effects[0].text.should.be.eql('hello')
 
-  it 'parseSetAttr', ->
-    atts = Parser.parseSetAttr('$name=Bob')
+  # it 'parseEffects2', ->
+  #   events = parse('start\n  @ hello\n  desc')
+
+  #   events.length.should.be.eql(1)
+  #   events[0].id.should.be.eql('start')
+  #   events[0].text.should.be.eql('desc')
+  #   events[0].effects.length.should.be.eql(1)
+  #   events[0].effects[0].text.should.be.eql('hello')
+
+  it 'parseAtts', ->
+    atts = Parser.parseAtts('$name=Bob')
     atts.name.should.be.eql('Bob')
 
-    atts = Parser.parseSetAttr('name=Rob')
+    atts = Parser.parseAtts('name=Rob')
     atts.name.should.be.eql('Rob')
 
-    atts = Parser.parseSetAttr('name=Hans|Hans')
+    atts = Parser.parseAtts('name=Hans|Hans')
     atts.name.should.be.eql('Hans')
 
-    atts = Parser.parseSetAttr('name=Hans|Hans job=Coder')
+    atts = Parser.parseAtts('name=Hans|Hans job=Coder')
     atts.name.should.be.eql('Hans')
     atts.job.should.be.eql('Coder')
 
@@ -227,6 +236,9 @@ describe 'TextHelper', ->
   it 'parseText', ->
     TextHelper.parse('abc').length.should.eql(3)
     TextHelper.parse('[abc|def]').length.should.eql(3)
+
+  it 'parseAtts', ->
+    TextHelper.replaceAtts('That $name', {name:'foo'}).should.be.eql('That foo')
 
 describe 'Core', ->
   it 'match', ->

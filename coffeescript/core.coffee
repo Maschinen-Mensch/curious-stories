@@ -7,6 +7,9 @@ class Proto
     evt
 
 class TextHelper
+  @replaceAtts = (text, atts={}) ->
+    text.replace(/\$\w+/g, (match) -> atts[match[1..]])
+
   @replaceName = (text, names=[]) ->
     names = Core.arrify(names)
 

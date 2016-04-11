@@ -10,11 +10,15 @@ class Effects
     Core.setFlags(flags, @story.partyFlags)
 
   setFlags: (flags, entity) ->
-    Core.setFlags(flags, entity.flags)
+    flagSet = if entity? then entity.partyFlags else @story.partyFlags
+    Core.setFlags(flags, flagSet)
+
+  setVar: (atts, entity) ->
+    Object.merge(entity.attributes, Parser.parseAtts(atts))
 
   addEntity: (atts) ->
     newEntity = @story.addEntity()
-    Object.merge(newEntity, Parser.parseSetAttr(atts))
+    Object.merge(newEntity.attributes, Parser.parseAtts(atts))
 
   image: (img) ->
     $('#gameImage').css('background-image', "url(#{img}").fadeIn()
@@ -26,8 +30,18 @@ class Requirements
   reqPartyFlags: (flags) ->
     Core.checkFlags(flags, @story.partyFlags)
 
+  reqVar: (atts, entity) ->
+    attrSet = Parser.parseAtts(atts)
+
+    for key, val of attrSet
+      if entity.attributes[key] isnt val
+        return false
+
+    true
+
   reqFlags: (flags, entity) ->
-    Core.checkFlags(flags, entity.flags)
+    flagSet = if entity? then entity.partyFlags else @story.partyFlags
+    Core.checkFlags(flags, flagSet)
 
 # ------------------export---------------------------
 
