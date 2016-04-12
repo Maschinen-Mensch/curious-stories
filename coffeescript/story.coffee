@@ -8,6 +8,7 @@ class Story
   startGame: ->
     @partyFlags = {}
     @entities = []
+    @eventCounts = {}
 
     $('#firepad-container').hide()
     $('#help').hide()
@@ -39,6 +40,10 @@ class Story
     $('#gameText p').addClass('old')
 
     @actions = []
+
+    if Object.isString(eventId) # id
+      @eventCounts[eventId] ?= 0
+      @eventCounts[eventId] += 1
 
     # resolve event id
     @doEvent(Proto.getEvent(eventId))
