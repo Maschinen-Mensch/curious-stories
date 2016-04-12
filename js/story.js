@@ -8,27 +8,28 @@
     function Story() {
       this.doEntityEffects = __bind(this.doEntityEffects, this);      this.reqs = new Requirements(this);
       this.effs = new Effects(this);
-      this.setupExtensions();
       $('#game').hide();
     }
 
     Story.prototype.startGame = function() {
       var code, e;
 
+      this.partyFlags = {};
+      this.entities = [];
+      this.eventCounts = {};
+      $('#firepad-container').hide();
+      $('#help').hide();
+      $('#gameText').empty();
+      $('#game').show();
       try {
         code = window.firepad.getText().split('\n');
         config.events = Parser.parse(code);
+        return this.showEvent(config.events[0]);
       } catch (_error) {
         e = _error;
         alert(e.message);
-        return;
+        return false;
       }
-      $('#firepad-container').hide();
-      $('#help').hide();
-      $('#game').empty().show();
-      this.partyFlags = {};
-      this.entities = [];
-      return this.showEvent(config.events[0]);
     };
 
     Story.prototype.editGame = function() {
@@ -38,25 +39,34 @@
     };
 
     Story.prototype.addEntity = function() {
-      var key, newEntity, protoEntity, val;
+      var newEntity;
 
       newEntity = new Entity();
-      protoEntity = config.entities.sample();
-      newEntity.name = TextHelper.parse(protoEntity.name);
-      for (key in protoEntity) {
-        val = protoEntity[key];
-        if (key[0] === '$') {
-          newEntity.attributes[key.slice(1)] = Core.randRange(val);
-        }
-      }
-      return this.entities.push(newEntity);
+      this.entities.push(newEntity);
+      return newEntity;
     };
 
     Story.prototype.showEvent = function(eventId) {
+      var action, actionIdx, _base, _i, _len, _ref, _ref1;
+
+      $('#gameText .action').remove();
+      $('#gameImage').hide();
+      $('#gameText p').addClass('old');
       this.actions = [];
-      this.doEvent(eventId);
+      if (Object.isString(eventId)) {
+        if ((_ref = (_base = this.eventCounts)[eventId]) == null) {
+          _base[eventId] = 0;
+        }
+        this.eventCounts[eventId] += 1;
+      }
+      this.doEvent(Proto.getEvent(eventId));
+      _ref1 = this.actions;
+      for (actionIdx = _i = 0, _len = _ref1.length; _i < _len; actionIdx = ++_i) {
+        action = _ref1[actionIdx];
+        $('#gameText').append("        <p class='action'>          <a onClick=\"doAction('" + actionIdx + "'); return false;\" href=''>            " + action.actionText + "          </a>        </p>");
+      }
       if (this.actions.length === 0) {
-        return $('#game').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>");
+        return $('#gameText').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>");
       }
     };
 
@@ -67,21 +77,22 @@
       return this.showEvent(action);
     };
 
-    Story.prototype.hasRequirements = function(eventIn, entity) {
-      var event, key, val;
+    Story.prototype.hasRequirements = function(event, entity) {
+      var cmd, _i, _len, _ref, _ref1;
 
-      event = Proto.getEvent(eventIn);
-      for (key in event) {
-        val = event[key];
-        if (key.startsWith('req')) {
-          Core.assert(this.reqs[key] != null, "Unknown requirement " + key);
-          if (!this.reqs[key](val, entity)) {
-            console.warn("failed requirement " + key + " for " + event.id);
+      Core.assert(Object.isObject(event));
+      _ref = event.commands;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        cmd = _ref[_i];
+        if (cmd.op.startsWith('req')) {
+          Core.assert(this.reqs[cmd.op] != null, "Unknown requirement " + cmd.op);
+          if (!this.reqs[cmd.op](cmd.arg, entity)) {
+            console.warn("failed requirement " + cmd.op + " for event " + ((_ref1 = event.id) != null ? _ref1 : 'inline'));
             return false;
           }
         }
       }
-      if (!this.doEntityEffects(event.entityEffects, true)) {
+      if (!this.doEntityEffects(event.effects, true)) {
         return false;
       }
       return true;
@@ -156,51 +167,46 @@
       return null;
     };
 
-    Story.prototype.doEffects = function(entry) {
-      var key, val;
+    Story.prototype.doCommands = function(entry) {
+      var cmd, _i, _len, _ref;
 
-      for (key in entry) {
-        val = entry[key];
-        if (this.effs[key] != null) {
-          this.effs[key](val);
+      _ref = entry.commands;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        cmd = _ref[_i];
+        if (this.effs[cmd.op] != null) {
+          this.effs[cmd.op](cmd.arg);
         }
       }
     };
 
-    Story.prototype.addText = function(txt, entities) {
-      var text;
+    Story.prototype.addText = function(txt, entity) {
+      var klass;
 
-      if (entities == null) {
-        entities = [];
-      }
+      klass = entity != null ? 'special' : '';
       if (txt != null) {
-        text = TextHelper.parse(txt);
-        text = TextHelper.replaceName(text, entities.map(function(ent) {
-          return ent.name;
-        }));
-        return $('#game').append("<p>" + text + "</p>");
+        txt = TextHelper.parse(txt);
+        if (entity != null) {
+          txt = TextHelper.replaceAtts(txt, entity.attributes);
+        }
+        return $('#gameText').append("<p class=" + klass + ">" + txt + "</p>");
       }
     };
 
-    Story.prototype.doEvent = function(eventIn, entity) {
-      var action, actionId, event, nextEventRef, _i, _len, _ref;
+    Story.prototype.doEvent = function(event, entity) {
+      var action, actionId, nextEventRef, _i, _len, _ref;
 
-      event = Proto.getEvent(eventIn);
+      Core.assert(Object.isObject(event));
       if (event.id != null) {
         console.log("do event [" + event.id + "]");
       }
-      $('#game .action').remove();
-      if (entity == null) {
-        this.addText(event.text);
-      }
-      this.doEffects(event);
-      this.doEntityEffects(event.entityEffects);
+      this.addText(event.text, entity);
+      this.doCommands(event);
+      this.doEntityEffects(event.effects);
       _ref = Core.arrify(event.actions);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         actionId = _ref[_i];
         action = Proto.getEvent(actionId);
         if (this.hasRequirements(action)) {
-          $('#game').append("          <p class='action'>            <a onClick=\"doAction('" + this.actions.length + "'); return false;\" href=''>              " + action.actionText + "            </a>          </p>");
           this.actions.push(action);
         }
       }
@@ -224,7 +230,7 @@
       _ref = Core.arrify(effects);
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         eff = _ref[_i];
-        optional = (_ref1 = eff.optional) != null ? _ref1 : false;
+        optional = (_ref1 = eff.optional) != null ? _ref1 : true;
         if (optional && testOnly) {
           continue;
         }
@@ -251,7 +257,11 @@
         } else {
           _ref3 = Core.parseRange(count), minCount = _ref3[0], maxCount = _ref3[1];
           if (entities.length < minCount) {
-            return false;
+            if (optional) {
+              continue;
+            } else {
+              return false;
+            }
           }
           entities = entities.sample(maxCount);
         }
@@ -266,7 +276,6 @@
           if ((evt.chance != null) && Math.random() > evt.chance) {
             continue;
           }
-          this.addText(evt.text, entities);
           _ref4 = entities.randomize();
           for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
             ent = _ref4[_j];
@@ -278,30 +287,6 @@
         }
       }
       return true;
-    };
-
-    Story.prototype.setupExtensions = function() {
-      var evt, id, parentEvt, slots, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
-
-      _ref = config.events;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        evt = _ref[_i];
-        if (evt["extends"] != null) {
-          _ref1 = evt["extends"].split(':'), id = _ref1[0], slots = _ref1[1];
-          parentEvt = Proto.getEvent(id);
-          if ((_ref2 = parentEvt.events) == null) {
-            parentEvt.events = [];
-          }
-          _results.push(parentEvt.events.push({
-            ref: id,
-            slots: (_ref3 = parseInt(slots)) != null ? _ref3 : 1
-          }));
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
     };
 
     return Story;

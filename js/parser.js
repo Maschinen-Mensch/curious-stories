@@ -10,7 +10,9 @@
     Parser.newEvent = function() {
       return {
         events: [],
-        actions: []
+        actions: [],
+        effects: [],
+        commands: []
       };
     };
 
@@ -28,9 +30,29 @@
       return state.events;
     };
 
-    Parser.parseLine = function(line, state) {
-      var evt, peek, rest, spaces, _ref;
+    Parser.parseAtts = function(line) {
+      var attrName, attrSet, attrVals, atts, _i, _len, _ref, _ref1;
 
+      atts = {};
+      _ref = line.split(' ');
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        attrSet = _ref[_i];
+        _ref1 = attrSet.split('='), attrName = _ref1[0], attrVals = _ref1[1];
+        if (attrName[0] === '$') {
+          attrName = attrName.slice(1);
+        }
+        atts[attrName] = attrVals.split('|').sample();
+      }
+      return atts;
+    };
+
+    Parser.parseLine = function(line, state) {
+      var args, commentIdx, evt, peek, rest, spaces, _ref;
+
+      commentIdx = line.indexOf('#');
+      if (commentIdx > -1) {
+        line = line.slice(0, commentIdx);
+      }
       _ref = Parser.extract(line), spaces = _ref[0], line = _ref[1];
       if (line.length === 0) {
         return;
@@ -54,12 +76,22 @@
         this.parseRef(rest, spaces, 'events', state);
       } else if (peek === '?') {
         this.parseRef(rest, spaces, 'actions', state);
+      } else if (peek === '@') {
+        this.parseRef(rest, spaces, 'effects', state);
+      } else if (peek === ':') {
+        args = rest.split(' ').map(function(arg) {
+          return arg.trim();
+        });
+        state.stack.last().evt.commands.push({
+          op: args[0],
+          arg: args.slice(1).join(' ')
+        });
       } else {
         evt = state.stack.last().evt;
-        evt.text = line;
         if (evt.actionText == null) {
-          evt.actionText = line;
+          evt.actionText = evt.text;
         }
+        evt.text = line;
       }
       return state.indent = spaces;
     };
@@ -72,7 +104,9 @@
       }
       if (line[0] === '>') {
         evt = line.slice(1).trim();
-        return state.stack.last().evt[collection].push(evt);
+        return state.stack.last().evt[collection].push({
+          ref: evt
+        });
       } else {
         evt = Parser.newEvent();
         state.stack.last().evt[collection].push(evt);
@@ -80,7 +114,11 @@
           spaces: spaces,
           evt: evt
         });
-        return evt.actionText = evt.text = line;
+        if (collection === 'actions') {
+          return evt.actionText = line;
+        } else {
+          return evt.text = line;
+        }
       }
     };
 

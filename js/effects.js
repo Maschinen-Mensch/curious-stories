@@ -20,18 +20,26 @@
       return Core.setFlags(flags, this.story.partyFlags);
     };
 
-    Effects.prototype.setFlags = function(flats, entity) {
-      return Core.setFlags(flags, entity.flags);
+    Effects.prototype.setFlags = function(flags, entity) {
+      var flagSet;
+
+      flagSet = entity != null ? entity.partyFlags : this.story.partyFlags;
+      return Core.setFlags(flags, flagSet);
     };
 
-    Effects.prototype.addEntity = function(count) {
-      var i, _i, _results;
+    Effects.prototype.setVar = function(atts, entity) {
+      return Object.merge(entity.attributes, Parser.parseAtts(atts));
+    };
 
-      _results = [];
-      for (i = _i = 0; 0 <= count ? _i < count : _i > count; i = 0 <= count ? ++_i : --_i) {
-        _results.push(this.story.addEntity());
-      }
-      return _results;
+    Effects.prototype.addEntity = function(atts) {
+      var newEntity;
+
+      newEntity = this.story.addEntity();
+      return Object.merge(newEntity.attributes, Parser.parseAtts(atts));
+    };
+
+    Effects.prototype.image = function(img) {
+      return $('#gameImage').css('background-image', "url(" + img).fadeIn();
     };
 
     return Effects;
@@ -47,8 +55,24 @@
       return Core.checkFlags(flags, this.story.partyFlags);
     };
 
+    Requirements.prototype.reqVar = function(atts, entity) {
+      var attrSet, key, val;
+
+      attrSet = Parser.parseAtts(atts);
+      for (key in attrSet) {
+        val = attrSet[key];
+        if (entity.attributes[key] !== val) {
+          return false;
+        }
+      }
+      return true;
+    };
+
     Requirements.prototype.reqFlags = function(flags, entity) {
-      return Core.checkFlags(flags, entity.flags);
+      var flagSet;
+
+      flagSet = entity != null ? entity.partyFlags : this.story.partyFlags;
+      return Core.checkFlags(flags, flagSet);
     };
 
     return Requirements;

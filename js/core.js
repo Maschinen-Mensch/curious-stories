@@ -11,9 +11,9 @@
       if (Object.isObject(id)) {
         return id;
       }
-      evt = config.events.find(function(e) {
+      evt = config.events.filter(function(e) {
         return e.id === id;
-      });
+      }).sample();
       Core.assert(evt != null, "Event with ID " + id + " not found");
       return evt;
     };
@@ -24,6 +24,15 @@
 
   TextHelper = (function() {
     function TextHelper() {}
+
+    TextHelper.replaceAtts = function(text, atts) {
+      if (atts == null) {
+        atts = {};
+      }
+      return text.replace(/\$\w+/g, function(match) {
+        return atts[match.slice(1)];
+      });
+    };
 
     TextHelper.replaceName = function(text, names) {
       var i, name, nameTxt, _i, _len;
