@@ -45,7 +45,7 @@
     </div>
 
 <div id="help">
-  <h1>Procedural Story Generation Engine</h1>
+  <h1>Story Generation Engine</h1>
 
   <h2>Syntax</h2>
   <p>Each story consists of a list of events. The story always starts with the <em>first</em> event that is found in the document. An event might look like this..</p>
@@ -57,6 +57,87 @@ main
     -> main
   ? Go right
     -> main
+</pre>
+
+<h2>Events</h2>
+
+New main events are declared on left most alignment.
+
+<pre>
+event1
+  Some text for event1
+
+event2
+  Some text for event2
+</pre>
+
+The first line that is written under a even becomes its even text. The game automatically starts using the very first declared event in the editor.
+
+Events can have follow-up events. They are designated by using a list using "-" on the line start.
+
+<pre>
+event1
+  Some text for event1
+  - This is a follow-up event
+  - This is another follow-up event
+</pre>
+
+No matter how many follow-up events a event has, only one will be chosen randomly. The text of the follow-up event is added to the same text entry as the father event.
+
+<h2>Event References</h2>
+
+Instead of writing out the new event in the line you may also reference an existing main event using its ID and the > sign.
+
+<pre>
+event1
+  Some text for event1
+  - > event2
+
+event2
+  This is a follow-up event for event1
+</pre>
+
+You may declare multiple events to have the same ID. In this case, when using a reference to that event, one of the events using that ID will be randomly selected.
+
+<pre>
+event1
+  Some text for event1
+  - > event2
+
+event2
+  This is a follow-up event for event1 (random choice)
+
+event2
+  This is a another follow-up event for event1 (random choice)
+</pre>
+
+All follow-up events are handled automatically without user input.
+
+<h2>Actions</h2>
+
+To add decision points you may use the ? character.
+
+<pre>
+main
+  You are standing in a desert
+  ? Go left
+    You go left. Nothing is here.
+  ? Go right
+    You go right. Nothing is here.
+</pre>
+
+The game flow will stop at events with decisions and offer them as multiple choice options. The text after the question marks gives the text on the decision button, in the next line the event is written as usual.
+
+You may again use references like this.
+
+<pre>
+main
+  You are standing in a desert
+  ? Go left
+    - > goLeft
+
+goLeft
+  You go left. Nothing is here.
 </pre>
 
 <h2>Comments</h2>
