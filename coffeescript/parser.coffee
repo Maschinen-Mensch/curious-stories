@@ -3,7 +3,7 @@ class Parser
     @events = []
 
   @newEvent = ->
-    { events: [], actions: [] }
+    { events: [], actions: [], effects: [], commands: [] }
 
   @parse = (lines) ->
     state = 
@@ -15,7 +15,20 @@ class Parser
 
     state.events
 
+  @parseAtts = (line) ->
+    atts = {}
+    for attrSet in line.split(' ')
+      [attrName, attrVals] = attrSet.split('=')
+      attrName = attrName[1..] if attrName[0] is '$'
+      atts[attrName] = attrVals.split('|').sample()
+
+    atts
+
   @parseLine = (line, state) ->
+    # remove comments
+    commentIdx = line.indexOf('#')
+    line = line[...commentIdx] if commentIdx > -1
+
     [spaces, line] = Parser.extract(line)
 
     return if line.length == 0
@@ -39,10 +52,17 @@ class Parser
     else if peek is '?'
       @parseRef(rest, spaces, 'actions', state)
 
+    else if peek is '@'
+      @parseRef(rest, spaces, 'effects', state)
+
+    else if peek is ':'
+      args = rest.split(' ').map((arg) -> arg.trim())
+      state.stack.last().evt.commands.push(op:args[0], arg:args[1..].join(' '))
+
     else
       evt = state.stack.last().evt
+      evt.actionText = evt.text unless evt.actionText?
       evt.text = line
-      evt.actionText = line unless evt.actionText?
 
     state.indent = spaces
 
@@ -52,14 +72,18 @@ class Parser
 
     if line[0] is '>'
       evt = line[1..].trim()
-      state.stack.last().evt[collection].push(evt)
+      state.stack.last().evt[collection].push({ref:evt})
       
     else
       evt = Parser.newEvent()
       state.stack.last().evt[collection].push(evt)
 
       state.stack.push(spaces:spaces, evt:evt)
-      evt.actionText = evt.text = line
+      
+      if collection is 'actions'
+        evt.actionText = line
+      else
+        evt.text = line
 
   @extract = (line) ->
     spaces = 0

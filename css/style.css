@@ -27,7 +27,7 @@ html {
   padding: 50px;
 }
 
-#game p {
+#gameText p {
 	font-size: 1.1em;
   -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
      -moz-animation: fadein 2s; /* Firefox < 16 */
@@ -36,12 +36,26 @@ html {
           animation: fadein 2s;
 }
 
-#game p.action {
+#gameText p.special {
+  color: orange;
 }
 
-#game a {
+#gameText p.old {
+  color: #393939;
+}
+
+#gameText p.action {
+}
+
+#gameText a {
   text-decoration: none;
   color: teal;
+}
+
+#gameImage {
+  width: 360px;
+  height: 240px;
+  background-size: cover;
 }
 
 @keyframes fadein {

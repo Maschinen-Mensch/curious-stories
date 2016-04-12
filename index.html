@@ -34,7 +34,10 @@
   </head>
   <body>
     <div id="firepad-container"></div>
-    <div id="game"></div>
+    <div id="game">
+      <div id="gameText"></div>
+      <div id="gameImage"></div>
+    </div>
 
     <div id="nav">
       <a href='' onclick="startGame(); return false;"><i class="fa fa-gamepad"></i></i></a>
@@ -48,41 +51,35 @@
   <p>Each story consists of a list of events. The story always starts with the <em>first</em> event that is found in the document. An event might look like this..</p>
 
 <pre>
-{
-  id: 'start',
-  text: "I walked down the narrow dark floor.",
-  actions: [
-    'walkLeft', 
-    'walkRight'
-  ]
-},
-{
-  id: 'walkLeft',
-  actionText: "Walk left",
-  text: "I walked down the left path."
-},
-{
-  id: 'walkRight',
-  actionText: "Walk right",
-  text: "I walked down the right path and fell into a pit."
-}
+main
+  You stand in the middle of nowhere.
+  ? Go left
+    -> main
+  ? Go right
+    -> main
 </pre>
 
-<h2>Events</h2>
+<h2>Comments</h2>
 
-  <dl>
-    <dt>id</dt>
-    <dd>ID of the event, which allows to reference it from other events. In case you never want to reference it there is not ID required.</dd>
+Comments are added via the # character. Everyhing after it will be considered a comment.
 
-    <dt>text</dt>
-    <dd>The text to be added by the event.</dd>
+<pre>
+# this is a comment
+main
+  You stand in the middle of nowhere. # this is also a comment
+</pre>
 
-    <dt>actionText</dt>
-    <dd>In case this event is used in a action list, this will be the text on the action button</dd>
+<h2>Images</h2>
 
-    <dt>actions</dt>
-    <dd>A list of event references.</dd>
-  </dl>
+Images are added via the :image command
+
+<pre>
+castle
+  You see a castle!
+  :image http://castle-images.com/castle.png
+
+</pre>
+
 </div>
 
     <script>
@@ -96,8 +93,8 @@
           styleActiveLine: true,
           mode: 'curiousscript',
           theme: 'monokai',
-          lineWrapping: true
-          // tabSize: 2,
+          lineWrapping: true,
+          tabSize: 2,
 
         });
 

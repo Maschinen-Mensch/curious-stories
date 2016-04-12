@@ -3,30 +3,26 @@ class Story
     @reqs = new Requirements(this)
     @effs = new Effects(this)
 
-    @setupExtensions()
-    # @startGame()
-
     $('#game').hide()
 
   startGame: ->
-    try
-      # code = "[#{window.firepad.getText()}]"
-      # acorn.parse(code)
-      # config.events = eval(code)
-      code = window.firepad.getText().split('\n')
-      config.events = Parser.parse(code)
-    catch e
-      alert(e.message)
-      return
+    @partyFlags = {}
+    @entities = []
+    @eventCounts = {}
 
     $('#firepad-container').hide()
     $('#help').hide()
-    $('#game').empty().show()
+    $('#gameText').empty()
+    $('#game').show()
 
-    @partyFlags = {}
-    @entities = []
+    try
+      code = window.firepad.getText().split('\n')
+      config.events = Parser.parse(code)
+      @showEvent(config.events[0])
 
-    @showEvent(config.events[0])
+    catch e
+      alert(e.message)
+      return false
 
   editGame: ->
     $('#game').hide()    
@@ -35,39 +31,50 @@ class Story
 
   addEntity: ->
     newEntity = new Entity()
-    # Object.merge(newEntity, protoEntity)
-
-    protoEntity = config.entities.sample()
-    newEntity.name = TextHelper.parse(protoEntity.name)
-
-    for key, val of protoEntity when key[0] is '$'
-      newEntity.attributes[key[1..]] = Core.randRange(val) 
-
     @entities.push(newEntity)
+    newEntity
 
   showEvent: (eventId) ->
+    $('#gameText .action').remove()
+    $('#gameImage').hide()
+    $('#gameText p').addClass('old')
+
     @actions = []
-    @doEvent(eventId)
+
+    if Object.isString(eventId) # id
+      @eventCounts[eventId] ?= 0
+      @eventCounts[eventId] += 1
+
+    # resolve event id
+    @doEvent(Proto.getEvent(eventId))
+
+    for action, actionIdx in @actions
+      $('#gameText').append("
+        <p class='action'>
+          <a onClick=\"doAction('#{actionIdx}'); return false;\" href=''>
+            #{action.actionText}
+          </a>
+        </p>")
 
     if @actions.length == 0 # game over
-      $('#game').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
+      $('#gameText').append("<p><a class=start href='' onClick='startGame(); return false;'>New Game</a></p>")
 
   doAction: (actionIdx) ->
     action = @actions[actionIdx]
     @showEvent(action)
 
-  hasRequirements: (eventIn, entity) ->
-    event = Proto.getEvent(eventIn)
+  hasRequirements: (event, entity) ->
+    Core.assert(Object.isObject(event))
 
-    for key, val of event
-      if key.startsWith('req')
-        Core.assert(@reqs[key]?, "Unknown requirement #{key}")
+    for cmd in event.commands
+      if cmd.op.startsWith('req')
+        Core.assert(@reqs[cmd.op]?, "Unknown requirement #{cmd.op}")
 
-        if not @reqs[key](val, entity)
-          console.warn("failed requirement #{key} for #{event.id}")
+        if not @reqs[cmd.op](cmd.arg, entity)
+          console.warn("failed requirement #{cmd.op} for event #{event.id ? 'inline'}")
           return false
 
-    if not @doEntityEffects(event.entityEffects, true)
+    if not @doEntityEffects(event.effects, true)
       return false
           
     true
@@ -75,8 +82,10 @@ class Story
   expandEvent: (def) ->
     if def.ref? # id/slot syntax
       Proto.getEvent(def.ref)
+
     else if Object.isObject(def) # inline syntax
       def
+
     else # short id syntax
       Proto.getEvent(def)
 
@@ -114,42 +123,38 @@ class Story
 
     null
 
-  doEffects: (entry) ->
-    for key, val of entry
-      @effs[key](val) if @effs[key]?
+  doCommands: (entry) ->
+    for cmd in entry.commands
+      @effs[cmd.op](cmd.arg) if @effs[cmd.op]?
         
     return
 
-  addText: (txt, entities=[]) ->
-    if txt?
-      text = TextHelper.parse(txt)
-      text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
-      $('#game').append("<p>#{text}</p>")
+  addText: (txt, entity) ->
+    klass = if entity? then 'special' else ''
 
-  doEvent: (eventIn, entity) ->
-    event = Proto.getEvent(eventIn)
+    if txt?
+      txt = TextHelper.parse(txt)
+      # text = TextHelper.replaceName(text, entities.map((ent) -> ent.name))
+
+      if entity?
+        txt = TextHelper.replaceAtts(txt, entity.attributes)
+
+      $('#gameText').append("<p class=#{klass}>#{txt}</p>")
+
+  doEvent: (event, entity) ->
+    Core.assert(Object.isObject(event))
     console.log("do event [#{event.id}]") if event.id?
 
-    $('#game .action').remove()
+    @addText(event.text, entity)
 
-    if not entity?
-      @addText(event.text) # only if party effect
-
-    @doEffects(event)
-    @doEntityEffects(event.entityEffects)
+    @doCommands(event)
+    @doEntityEffects(event.effects)
 
     # actions
     for actionId in Core.arrify(event.actions)
       action = Proto.getEvent(actionId)
 
       if @hasRequirements(action)
-        $('#game').append("
-          <p class='action'>
-            <a onClick=\"doAction('#{@actions.length}'); return false;\" href=''>
-              #{action.actionText}
-            </a>
-          </p>")
-
         @actions.push(action)
 
     # follow-up events
@@ -163,7 +168,7 @@ class Story
     consumedEntities = []
 
     for eff in Core.arrify(effects)
-      optional = eff.optional ? false
+      optional = eff.optional ? true
       continue if optional and testOnly
 
       evt = @expandEvent(eff)
@@ -186,7 +191,8 @@ class Story
 
       else
         [minCount, maxCount] = Core.parseRange(count)
-        return false if entities.length < minCount
+        if entities.length < minCount
+          if optional then continue else return false
 
         entities = entities.sample(maxCount)
 
@@ -196,8 +202,7 @@ class Story
       unless testOnly
         continue if evt.chance? and Math.random()>evt.chance
 
-        # add effect text for all entities at once
-        @addText(evt.text, entities)
+        # @addText(evt.text, entities)
         
         # do event individually for each captured person
         for ent in entities.randomize()
@@ -208,14 +213,6 @@ class Story
 
     true
 
-  setupExtensions: ->
-    for evt in config.events
-      if evt.extends?
-        [id, slots] = evt.extends.split(':')
-
-        parentEvt = Proto.getEvent(id)
-        parentEvt.events ?= []
-        parentEvt.events.push({ref:id, slots:parseInt(slots) ? 1})
  
 # ---------------------------------------------
 
