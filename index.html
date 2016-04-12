@@ -161,6 +161,29 @@ castle
 
 </pre>
 
+
+<h2>Flags</h2>
+
+You may write and read flags and branch accordingly.
+
+<pre>
+foundRope
+  You find a rope.
+  : setFlags +rope
+
+pit
+  There is a pit in front of you.
+  ? Jump over it
+    You die.
+    : reqFlags -rope
+
+  ? Use the rope.
+    You make it.
+    : reqFlags +rope
+</pre>
+
+You may use any word as a flag. Writing a plus before it sets it to true, a minus sets it to false.
+
 </div>
 
     <script>
