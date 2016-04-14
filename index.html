@@ -33,7 +33,11 @@
 
   </head>
   <body>
-    <div id="firepad-container"></div>
+    <div id="editor">
+      <div id="firepad-container"></div>
+      <div id="errors">0 ERRORS</div>
+    </div>
+
     <div id="game">
       <div id="gameText"></div>
       <div id="gameImage"></div>
@@ -43,6 +47,7 @@
       <a href='' onclick="startGame(); return false;"><i class="fa fa-gamepad"></i></i></a>
       <a href='' onclick="editGame(); return false;"><i class="fa fa-pencil"></i></a>
     </div>
+
 
 <div id="help">
   <h1>Story Generation Engine</h1>
@@ -204,7 +209,7 @@ You may use any word as a flag. Writing a plus before it sets it to true, a minu
 
         // Create Firepad.
         window.firepad = Firepad.fromCodeMirror(firepadRef, window.codeMirror, {
-          defaultText: '// Hello World'
+          defaultText: '# Hello World'
         });
       }
 

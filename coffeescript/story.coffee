@@ -10,14 +10,22 @@ class Story
     @entities = []
     @eventCounts = {}
 
-    $('#firepad-container').hide()
-    $('#help').hide()
-    $('#gameText').empty()
-    $('#game').show()
-
     try
       code = window.firepad.getText().split('\n')
-      config.events = Parser.parse(code)
+      [config.events, @errors] = Parser.parse(code)
+
+      if @errors.length > 0
+        firstError = @errors[0]
+        $('#errors').html("#{@errors.length} ERRORS - #{firstError.text}:#{firstError.lineIdx}").show()
+        return false
+      else
+        $('#errors').hide()
+
+      $('#firepad-container').hide()
+      $('#help').hide()
+      $('#gameText').empty()
+      $('#game').show()
+
       @showEvent(config.events[0])
 
     catch e
