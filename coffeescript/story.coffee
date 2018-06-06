@@ -21,9 +21,11 @@ class Story
       else
         $('#errors').hide()
 
-      $('#firepad-container').hide()
+      $('#editor').hide()
       $('#help').hide()
       $('#gameText').empty()
+      $('#startButton').hide()
+      $('#editButton').show()
       $('#game').show()
 
       @showEvent(config.events[0])
@@ -35,7 +37,9 @@ class Story
   editGame: ->
     $('#game').hide()    
     $('#help').show()    
-    $('#firepad-container').show()
+    $('#editor').show()
+    $('#startButton').show()
+    $('#editButton').hide()
 
   addEntity: ->
     newEntity = new Entity()
