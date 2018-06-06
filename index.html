@@ -228,8 +228,33 @@ You may use any word as a flag. Writing a plus before it sets it to true, a minu
         };
         firebase.initializeApp(config);
 
+        var hash = window.location.hash.replace(/#/g, '');
+        if (hash == "") {
+          try
+          {
+            hash = window.localStorage.getItem("curiousHash")
+          }
+          catch
+          {
+
+          }
+          if ((hash == "" || hash == null))
+          {
+            hash = Math.random().toString(16).substring(2)
+          }
+          window.location = window.location + '#' + hash; // add it as a hash to the URL.
+          try
+          {
+            window.localStorage.setItem("curiousHash", hash)
+          }
+          catch
+          {
+
+          }
+        }
+
         // Get Firebase Database reference.
-        var firepadRef = firebase.database().ref();
+        var firepadRef = firebase.database().ref(hash);
         return firepadRef
       }
 
