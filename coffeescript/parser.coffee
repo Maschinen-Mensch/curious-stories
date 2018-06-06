@@ -9,11 +9,15 @@ class Parser
     state = 
       indent: 0
       events: []
+      errors: []
 
-    for line in lines
-      @parseLine(line, state)
+    for line, lineIdx in lines
+      try
+        @parseLine(line, lineIdx, state)
+      catch err
+        state.errors.push(lineIdx:lineIdx, text:"syntax error")
 
-    state.events
+    [state.events, state.errors]
 
   @parseAtts = (line) ->
     atts = {}
@@ -24,7 +28,7 @@ class Parser
 
     atts
 
-  @parseLine = (line, state) ->
+  @parseLine = (line, lineIdx, state) ->
     # remove comments
     commentIdx = line.indexOf('#')
     line = line[...commentIdx] if commentIdx > -1
@@ -37,7 +41,10 @@ class Parser
     rest = line[1..].trim()
 
     if spaces < state.indent
-      state.stack.pop()
+      closedEvt = state.stack.pop().evt
+
+      if closedEvt.events.length + closedEvt.actions.length == 0
+        state.errors.push(lineIdx:lineIdx, text:"no actions or events defined")
 
     if spaces == 0
       evt = Parser.newEvent()

@@ -15,13 +15,18 @@ html {
   height: 100%; 
 }
 
+#editor {
+  width: 100%;
+  height: 100%;
+}
+
 #firepad-container {
   height: 100%;
   margin-right: 440px;
 }
 
 #game {
-  margin: 50px auto;
+  margin: auto;
   text-align: left;
   width: 800px;
   padding: 50px;
@@ -90,7 +95,7 @@ html {
 #nav {
   position: absolute;
   top: 10px;
-  right: 426px;
+  right: 440px;
   height: 32px;
   width: 100px;
   font-size: 12px;
@@ -122,7 +127,7 @@ html {
   z-index: 10;
   padding: 0 20px;
   margin: 0;
-  font-family: verdana;
+  font-family: Verdana;
   font-size: 0.8em;
   color: #C3C3C3;
   background-color: #333;
@@ -155,3 +160,22 @@ html {
 a.powered-by-firepad {
     display: none;
 }
+
+#errors {
+  display: none;
+  background-color: red;
+  color: black;
+  height: 20px;
+  width: 400px;
+  position: absolute;
+  bottom: 0;
+  left: 100px;
+  z-index: 100;
+  padding: 10px;
+  font-family: Verdana;
+  font-size:0.8em;
+  text-transform: uppercase;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+

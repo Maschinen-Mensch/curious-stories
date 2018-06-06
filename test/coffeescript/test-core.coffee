@@ -1,6 +1,6 @@
 describe 'Parser', ->
   parse = (txt) ->
-    Parser.parse(txt.split('\n'))
+    Parser.parse(txt.split('\n'))[0]
 
   it 'parseEventSimple', ->
     events = parse('start')
@@ -50,10 +50,8 @@ describe 'Parser', ->
   #   events.length.should.be.eql(1)
   #   events[0].events[0].ref.should.be.eql('next1')
 
-
   it 'parseActions', ->
-    lines = ['start', '  ? act1', '  ? act2']
-    events = Parser.parse(lines)
+    events = parse('start\n  ? act1\n  ? act2')
 
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
@@ -62,8 +60,7 @@ describe 'Parser', ->
     events[0].actions[1].actionText.should.be.eql('act2')
 
   it 'parseActions2', ->
-    lines = ['start', '  ? act', '    desc']
-    events = Parser.parse(lines)
+    events = parse('start\n  ? act\n    desc')
 
     events.length.should.be.eql(1)
     events[0].id.should.be.eql('start')
